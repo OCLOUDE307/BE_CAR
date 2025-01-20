@@ -81,6 +81,63 @@ public class FilterController {
         }
     }
 
+    @GetMapping("/mainFilterPage")
+    public ResponseEntity<ResponseAllCarDto> searchByFilter(
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) String area,
+            @RequestParam(required = false) String year,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String model,
+            @RequestParam(required = false) String transmission,
+            @RequestParam(required = false) String fuelType,
+            @RequestParam(defaultValue = "normal") String carType,
+            @RequestParam(defaultValue = "1") int pageNo,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        Integer convertedYear = null;
+        try {
+            convertedYear = (year != null && !year.isEmpty()) ? Integer.valueOf(year) : null;
+        } catch (NumberFormatException e) {
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("unsuccess");
+            responseAllCarDto.setException("Invalid year format");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseAllCarDto);
+        }
+
+        FilterDto filterDto = new FilterDto(minPrice, maxPrice, area, brand, model, transmission, fuelType, convertedYear, carType);
+
+        try {
+            List<CarDto> listOfCar = filterService.searchByFilterPage(filterDto, pageNo, pageSize);
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("success");
+            responseAllCarDto.setList(listOfCar);
+            return ResponseEntity.status(HttpStatus.OK).body(responseAllCarDto);
+        } catch (PageNotFoundException pageNotFoundException) {
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("unsuccess");
+            responseAllCarDto.setException("Page not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseAllCarDto);
+        } catch (Exception e) {
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("unsuccess");
+            responseAllCarDto.setException("An error occurred while filtering cars");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseAllCarDto);
+        }
+    }
+
+    @GetMapping("/top4Cars")
+    public ResponseEntity<ResponseAllCarDto> getTop4Cars() {
+        try {
+            List<CarDto> topCars = filterService.getTop4Cars();
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("success");
+            responseAllCarDto.setList(topCars);
+            return ResponseEntity.status(HttpStatus.OK).body(responseAllCarDto);
+        } catch (Exception e) {
+            ResponseAllCarDto responseAllCarDto = new ResponseAllCarDto("unsuccess");
+            responseAllCarDto.setException("An error occurred while fetching top 4 cars");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseAllCarDto);
+        }
+    }
+
+
+
 
     @GetMapping("/searchBarFilter")
     public ResponseEntity<?> searchBarFilter(@RequestParam String searchBarInput) {
