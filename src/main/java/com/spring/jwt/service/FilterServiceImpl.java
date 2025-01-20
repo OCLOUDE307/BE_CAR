@@ -88,6 +88,81 @@ public class FilterServiceImpl implements FilterService {
         return listOfCarDto;
     }
 
+    @Override
+    public List<CarDto> searchByFilterPage(FilterDto filterDto, int pageNo, int pageSize) {
+        Specification<Car> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (filterDto.getMinPrice() != null) {
+                predicates.add(criteriaBuilder.greaterThan(root.get("price"), filterDto.getMinPrice()));
+            }
+            if (filterDto.getMaxPrice() != null) {
+                predicates.add(criteriaBuilder.lessThan(root.get("price"), filterDto.getMaxPrice()));
+            }
+            if (filterDto.getArea() != null && !filterDto.getArea().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("area"), filterDto.getArea()));
+            }
+            if (filterDto.getYear() != 0) {
+                predicates.add(criteriaBuilder.equal(root.get("year"), filterDto.getYear()));
+            }
+            if (filterDto.getBrand() != null && !filterDto.getBrand().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("brand"), filterDto.getBrand()));
+            }
+            if (filterDto.getModel() != null && !filterDto.getModel().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("model"), filterDto.getModel()));
+            }
+            if (filterDto.getTransmission() != null && !filterDto.getTransmission().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("transmission"), filterDto.getTransmission()));
+            }
+            if (filterDto.getFuelType() != null && !filterDto.getFuelType().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("fuelType"), filterDto.getFuelType()));
+            }
+            if (filterDto.getCarType() != null && !filterDto.getCarType().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("carType"), filterDto.getCarType()));
+            }
+            Predicate statusPredicate = criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("carStatus"), Status.ACTIVE),
+                    criteriaBuilder.equal(root.get("carStatus"), Status.PENDING)
+            );
+            predicates.add(statusPredicate);
+
+            query.orderBy(criteriaBuilder.desc(root.get("id")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // Convert to zero-based index for page number
+
+        Page<Car> carPage = carRepo.findAll(spec, pageable);
+        if (carPage.isEmpty()) {
+            throw new PageNotFoundException("No cars found for the specified filter and page.");
+        }
+
+        List<CarDto> listOfCarDto = carPage.stream()
+                .map(CarDto::new)
+                .toList();
+
+        return listOfCarDto;
+    }
+
+
+    public List<CarDto> getTop4Cars() {
+        // Fetch the top 4 cars based on their ID in descending order
+        List<Car> topCars = carRepo.findTop4ByOrderByIdDesc();
+        List<CarDto> carDtoList = new ArrayList<>();
+
+        // Convert Car entities to CarDto
+        for (Car car : topCars) {
+            CarDto carDto = new CarDto(car);
+            carDto.setCarId(car.getId());
+            carDtoList.add(carDto);
+        }
+
+        return carDtoList;
+    }
+
+
+
 
     @Override
     public List<CarDto> getAllCarsWithPages(int PageNo) {
