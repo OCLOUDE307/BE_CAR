@@ -107,6 +107,7 @@ public class AppConfig {
                         "/swagger-ui.html"
                 ).permitAll()
                 .requestMatchers("/cars/**").permitAll()
+                .requestMatchers("/biddingHTTP/**").permitAll()
                 .requestMatchers("/finalBid/**").permitAll()
                 .requestMatchers("/BeadingCarController/**").permitAll()
                 .requestMatchers("/booking/**").permitAll()
