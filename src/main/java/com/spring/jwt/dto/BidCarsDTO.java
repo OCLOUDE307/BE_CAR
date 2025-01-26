@@ -20,6 +20,13 @@ public class BidCarsDTO {
 
     private Integer userId;
 
+    public BidCarsDTO(BidCarsDTO bidCarsDTO) {
+        this.beadingCarId = bidCarsDTO.beadingCarId;
+        this.closingTime = bidCarsDTO.closingTime;
+        this.createdAt = bidCarsDTO.createdAt;
+        this.basePrice = bidCarsDTO.basePrice;
+        this.userId = bidCarsDTO.userId;
+    }
 
     public BidCarsDTO(BeadingCAR beadingCAR) {
     }

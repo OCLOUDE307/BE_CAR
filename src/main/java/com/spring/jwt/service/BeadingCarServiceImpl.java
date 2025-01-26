@@ -293,6 +293,15 @@ public class BeadingCarServiceImpl implements BeadingCarService {
         return new BeadingCarWithInsDto(beadingCAR);
     }
 
+    @Override
+    public BidCarsDTO getLiveCar(Integer bidingCarId) {
+        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+        BidCars liveCars = bidCarsRepo.findByBeadingCarId(bidingCarId).orElseThrow(()->new RuntimeException("not foud by beading car id"));
+        System.err.println(liveCars);
+
+        return convertToDto(liveCars);
+    }
+
 
     private BidCarsDTO convertToDto(BidCars beadingCar) {
         BidCarsDTO dto = new BidCarsDTO();

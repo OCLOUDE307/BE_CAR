@@ -1,10 +1,7 @@
 package com.spring.jwt.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.spring.jwt.Interfaces.BeadingCarService;
 import com.spring.jwt.Interfaces.PlacedBidService;
@@ -61,6 +58,19 @@ public class BiddingHTTPS {
         } catch (Exception e) {
             logger.error("Error getting live cars: {}", e.getMessage());
             return Collections.emptyList();
+        }
+    }
+
+    @GetMapping("/liveCar/{bidingCarId}")
+    public BidCarsDTO getAllLiveCars(@PathVariable Integer bidingCarId) {
+        try {
+            LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+            BidCarsDTO liveCars = beadingCarService.getLiveCar(bidingCarId);
+            System.err.println(liveCars);
+            return liveCars;
+        } catch (Exception e) {
+            logger.error("Error getting live cars: {}", e.getMessage());
+            return null;
         }
     }
 
